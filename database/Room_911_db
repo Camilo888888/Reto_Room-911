@@ -1,0 +1,66 @@
+-- =============================================================================
+-- TABLA: admin_user
+-- Propósito: Almacenar los usuarios administradores del módulo ROOM_911
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS admin_user (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL, -- Guardará el hash encriptado (BCrypt)
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- TABLA: department
+-- Propósito: Almacenar los departamentos de producción de Laboratorios XYZ
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS department (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- =============================================================================
+-- TABLA: employee
+-- Propósito: Almacenar los datos básicos del personal y sus permisos sanitarios
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS employee (
+    id SERIAL PRIMARY KEY,
+    internal_id VARCHAR(50) UNIQUE NOT NULL, -- ID impreso en el carnet corporativo
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    department_id INT REFERENCES department(id) ON DELETE SET NULL,
+    has_access BOOLEAN DEFAULT TRUE, -- Permiso explícito de acceso concedido por el admin
+    medical_cert_expiry DATE NOT NULL, -- Innovación 1: Vencimiento de examen médico
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- TABLA: access_log
+-- Propósito: Trazabilidad e historial inalterable de todos los intentos de acceso
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS access_log (
+    id SERIAL PRIMARY KEY,
+    scanned_internal_id VARCHAR(50) NOT NULL, -- Guardará el ID ingresado, exista o no
+    employee_id INT REFERENCES employee(id) ON DELETE SET NULL,
+    access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL,
+    -- Posibles valores de status:
+    -- 'GRANTED'                    -> Acceso permitido exitosamente
+    -- 'DENIED_NO_ACCESS'           -> Empleado inactivo o con acceso revocado
+    -- 'DENIED_UNREGISTERED'        -> ID no existe en la base de datos
+    -- 'DENIED_EXPIRED_CERTIFICATE' -> Certificado o examen médico vencido
+    -- 'DENIED_NO_PPE'              -> No cumplió checklist de bioseguridad (EPP)
+    ppe_verified BOOLEAN DEFAULT FALSE, -- Innovación 2: Indicador si cumplió EPP
+    notes TEXT
+);
+
+-- =============================================================================
+-- ÍNDICES PARA OPTIMIZAR BÚSQUEDAS Y REPORTES
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS idx_employee_internal_id ON employee(internal_id);
+CREATE INDEX IF NOT EXISTS idx_employee_department ON employee(department_id);
+CREATE INDEX IF NOT EXISTS idx_access_log_employee ON access_log(employee_id);
+CREATE INDEX IF NOT EXISTS idx_access_log_time ON access_log(access_time);
