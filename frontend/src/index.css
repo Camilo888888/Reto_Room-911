@@ -1,0 +1,26 @@
+:root {
+  --bg-principal: #f0f7ff;
+  --card-bg: #ffffff;
+  --border-color: #bbe1fa;
+  --primary-blue: #0284c7;
+  --primary-hover: #0369a1;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --success-bg: #dcfce7;
+  --success-text: #15803d;
+  --danger-bg: #fee2e2;
+  --danger-text: #b91c1c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-principal);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
