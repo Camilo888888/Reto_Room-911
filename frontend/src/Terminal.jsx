@@ -13,17 +13,17 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
     setMensaje(null);
 
     try {
-      // Petición al endpoint exacto de tu controlador Spring Boot
+      // Petición al endpoint de validación en Spring Boot
       const res = await fetch(`http://localhost:8080/api/employees/validate/${carnet.trim()}`);
       const data = await res.json();
 
       if (res.ok && data.valid) {
-        // ACCESO CONCEDIDO
         const emp = data.employee;
         const depNombre = typeof emp.department === 'string' 
           ? emp.department 
           : (emp.department?.name || 'General');
 
+        // Detecta si pertenece a administración o si la propiedad isAdmin viene en true
         const esAdministrador = depNombre.toLowerCase().includes('admin') || emp.isAdmin === true;
 
         const resultadoRegistro = {
@@ -31,7 +31,7 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
           nombre: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
           exitoso: true,
           departamento: depNombre,
-          esAdmin: esAdministrador,
+          esAdmin: esAdministrador, // Notifica a App.jsx si es Admin
           fecha: new Date().toLocaleTimeString()
         };
 
@@ -40,10 +40,13 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
           texto: `✅ ACCESO CONCEDIDO: ${resultadoRegistro.nombre} (${depNombre})`
         });
 
-        if (registrarAcceso) registrarAcceso(resultadoRegistro);
+        // Notifica a App.jsx para cambiar de vista e iniciar sesión
+        if (registrarAcceso) {
+          registrarAcceso(resultadoRegistro);
+        }
 
       } else {
-        // ACCESO DENEGADO (Carnet no registrado o sin permisos)
+        // Acceso denegado o carnet no registrado
         setMensaje({
           tipo: 'error',
           texto: `❌ ${data.message || 'ACCESO DENEGADO'}`
@@ -52,7 +55,7 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
         if (registrarAcceso) {
           registrarAcceso({
             carnet: carnet.trim(),
-            nombre: data.employee ? `${data.employee.firstName} ${data.employee.lastName}` : 'Desconocido',
+            nombre: data.employee ? `${data.employee.firstName || ''} ${data.employee.lastName || ''}`.trim() : 'Desconocido',
             exitoso: false,
             departamento: data.employee?.department?.name || 'N/A',
             esAdmin: false,
@@ -61,7 +64,7 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
         }
       }
     } catch (error) {
-      console.error('Error al conectar con el backend:', error);
+      console.error('Error al conectar con la API:', error);
       setMensaje({
         tipo: 'error',
         texto: '⚠️ ERROR DE CONEXIÓN: No se pudo conectar con el servidor backend.'
@@ -82,7 +85,7 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
       margin: '0 auto',
       boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
     }}>
-      {/* BADGE DE SESIÓN ADMIN */}
+      {/* BADGE DE SESIÓN ADMIN EN LA TERMINAL */}
       {esAdmin && (
         <div style={{
           display: 'flex',
@@ -116,7 +119,7 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
       )}
 
       <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0f172a', textAlign: 'center' }}>
-        Terminal de Control de Acceso
+        📟 Terminal de Control de Acceso
       </h2>
       <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b', textAlign: 'center' }}>
         Ingrese su carnet o ID interno para validar credenciales
@@ -158,7 +161,6 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
         </button>
       </form>
 
-      {/* MENSAJE DE RESULTADO */}
       {mensaje && (
         <div style={{
           marginTop: '20px',
@@ -175,7 +177,6 @@ export default function Terminal({ registrarAcceso, historial = [], esAdmin, cer
         </div>
       )}
 
-      {/* HISTORIAL LOCAL */}
       {historial.length > 0 && (
         <div style={{ marginTop: '28px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
           <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>

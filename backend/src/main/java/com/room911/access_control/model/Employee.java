@@ -1,7 +1,15 @@
 package com.room911.access_control.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "employees")
@@ -19,6 +27,10 @@ public class Employee {
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    // 🔑 NUEVO CAMPO DE CONTRASEÑA EN LA TABLA
+    @Column(name = "password")
+    private String password;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -42,6 +54,10 @@ public class Employee {
 
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
+
+    // 🔑 GETTER Y SETTER PARA LA CONTRASEÑA
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public Department getDepartment() { return department; }
     public void setDepartment(Department department) { this.department = department; }
