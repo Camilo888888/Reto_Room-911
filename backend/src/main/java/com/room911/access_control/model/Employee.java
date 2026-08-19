@@ -28,7 +28,6 @@ public class Employee {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    // 🔑 NUEVO CAMPO DE CONTRASEÑA EN LA TABLA
     @Column(name = "password")
     private String password;
 
@@ -38,6 +37,10 @@ public class Employee {
 
     @Column(name = "access_granted")
     private Boolean accessGranted = true;
+
+    // CAMPO OBLIGATORIO PARA PERSISTIR EL ESTADO DEL USUARIO
+    @Column(name = "active")
+    private Boolean active = true;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,7 +58,6 @@ public class Employee {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    // 🔑 GETTER Y SETTER PARA LA CONTRASEÑA
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
@@ -64,6 +66,10 @@ public class Employee {
 
     public Boolean getAccessGranted() { return accessGranted; }
     public void setAccessGranted(Boolean accessGranted) { this.accessGranted = accessGranted; }
+
+    // GETTER Y SETTER DE ACTIVE
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

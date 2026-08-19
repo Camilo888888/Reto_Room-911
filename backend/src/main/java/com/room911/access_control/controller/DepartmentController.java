@@ -1,11 +1,13 @@
 package com.room911.access_control.controller;
 
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +18,7 @@ import com.room911.access_control.repository.DepartmentRepository;
 
 @RestController
 @RequestMapping("/api/departments")
-@CrossOrigin(origins = "*") // 👈 Permite la conexión directa desde React
+@CrossOrigin(origins = "*")
 public class DepartmentController {
 
     private final DepartmentRepository departmentRepository;
@@ -25,20 +27,33 @@ public class DepartmentController {
         this.departmentRepository = departmentRepository;
     }
 
+    // GET: Obtener todos los departamentos para el Frontend
     @GetMapping
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
     }
 
+    // POST: Crear un nuevo departamento
     @PostMapping
-    public ResponseEntity<?> createDepartment(@RequestBody Department department) {
-        if (department.getName() == null || department.getName().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El nombre no puede estar vacío.");
-        }
-        
-        // Asignamos el ID en null para forzar un registro nuevo en PostgreSQL
-        department.setId(null); 
+    public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
         Department saved = departmentRepository.save(department);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        return ResponseEntity.ok(saved);
+    }
+
+    // DELETE /all: Eliminar todos los departamentos
+    @DeleteMapping("/all")
+    public ResponseEntity<?> deleteAllDepartments() {
+        departmentRepository.deleteAll();
+        return ResponseEntity.ok(Map.of("message", "Todos los departamentos fueron eliminados."));
+    }
+
+    // DELETE /{id}: Eliminar un departamento por su ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDepartmentById(@PathVariable Long id) {
+        if (!departmentRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        departmentRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("message", "Departamento eliminado correctamente."));
     }
 }
